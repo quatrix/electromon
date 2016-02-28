@@ -5,15 +5,13 @@
 #include <LiquidCrystal_I2C.h>
 #include <SoftwareSerial.h>
 
-#define EMONCMS_KEY "3873f22d0d8051a59794892815a6f2bf"
-
 SoftwareSerial esp8266_serial(2,3);
 
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I2C address
 EnergyMonitor emon1;             // Create an instance
 
 String genStatsRequest(float realPower, float apparentPower, float powerFactor, float Vrms, float Irms) {
-    String cmd = String("GET /input/post.json?json={");
+    String cmd = String("GET /input?json={");
 
     cmd += "realPower:";
     cmd += realPower;
@@ -30,8 +28,7 @@ String genStatsRequest(float realPower, float apparentPower, float powerFactor, 
     cmd += ",Irms:";
     cmd += Irms;
 
-    cmd += "}&apikey=";
-    cmd += EMONCMS_KEY;
+    cmd += "}";
     cmd += " HTTP/1.0\r\n";
     cmd += "Host: emoncms.org\r\n";
     cmd += "User-Agent: Arduino-ethernet\r\n";
@@ -44,10 +41,8 @@ String genStatsRequest(float realPower, float apparentPower, float powerFactor, 
 boolean send(String dst_ip, String request) {
     String cmd = "AT+CIPSTART=\"TCP\",\"";
     cmd += dst_ip;
-    cmd += "\",80";
+    cmd += "\",55667";
     esp8266_serial.println(cmd);
-
-    Serial.println(cmd);
 
     if(esp8266_serial.find("Error"))
          return false;
@@ -126,6 +121,6 @@ void loop() {
     writeToLCD("V(rms):   " + String(Vrms), 2);
     writeToLCD("I(rms):   " + String(Irms), 3);
 
-    send("80.243.190.58",genStatsRequest(realPower, apparentPower, powerFactor, Vrms, Irms));
+    send("108.161.129.205",genStatsRequest(realPower, apparentPower, powerFactor, Vrms, Irms));
 }
 
